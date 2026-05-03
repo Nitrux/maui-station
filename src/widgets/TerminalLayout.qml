@@ -47,7 +47,6 @@ Maui.SplitView
             watchForSilence: settings.watchForSilence
             onTaskFinished: (commandName) =>
             {
-                console.log("[station-debug][layout]", "taskFinished", "tabTitle=", control.title, "commandName=", commandName, "isCurrentTab=", control.isCurrentTab, "rootActive=", root.active, "alertProcess=", settings.alertProcess)
                 if(settings.alertProcess)
                 {
                     root.notifyProcessAlert("dialog-warning",
@@ -59,7 +58,6 @@ Maui.SplitView
             }
             onSilenceWarning:
             {
-                console.log("[station-debug][layout]", "silenceWarning", "tabTitle=", control.title, "isCurrentTab=", control.isCurrentTab, "rootActive=", root.active, "watchForSilence=", settings.watchForSilence)
                 root.notifyProcessAlert("dialog-warning",
                                         i18n("Pending Process"),
                                         i18n("Running process '%1' has been inactive for more than 30 seconds.", title),
@@ -73,30 +71,23 @@ Maui.SplitView
 
     function split()
     {
-        console.log("[station-debug][layout]", "split requested", "count=", control.count, "path=", control.path, "title=", control.title)
         if(control.count === 2)
         {
-            console.log("[station-debug][layout]", "split already exists, popping instead")
             pop()
             return
         }//close the innactive split
 
         control.addSplit(_terminalComponent, {'path': control.path});
-        console.log("[station-debug][layout]", "split added", "newCount=", control.count)
     }
 
     function pop()
     {
         var index = control.currentIndex === 1 ? 0 : 1
-        const splitItem = control.contentModel.get(index)
-        console.log("[station-debug][layout]", "pop requested", "index=", index, "hasSplitItem=", !!splitItem, "hasActiveProcess=", splitItem ? splitItem.hasActiveProcess : false, "rawHasActiveProcess=", splitItem ? splitItem.rawHasActiveProcess : false, "foreground=", splitItem ? splitItem.foregroundProcessName : "", "preventClosing=", settings.preventClosing)
         if(control.contentModel.get(index).hasActiveProcess && settings.preventClosing)
         {            
-            console.log("[station-debug][layout]", "opening confirmation dialog for split")
             openCloseDialog(index, control.closeSplit)
         }else
         {
-            console.log("[station-debug][layout]", "closing split immediately")
             control.closeSplit(index)
         }
     }

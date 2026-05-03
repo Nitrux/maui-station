@@ -66,8 +66,6 @@ Maui.SettingsDialog
                         {
                             settings.watchForSilence = false
                         }
-
-                        console.log("[station-debug][settings]", "preventClosing=", settings.preventClosing, "alertProcess=", settings.alertProcess, "watchForSilence=", settings.watchForSilence)
                     }
                 }
             }
@@ -87,8 +85,6 @@ Maui.SettingsDialog
                         {
                             settings.watchForSilence = false
                         }
-
-                        console.log("[station-debug][settings]", "preventClosing=", settings.preventClosing, "alertProcess=", settings.alertProcess, "watchForSilence=", settings.watchForSilence)
                     }
                 }
             }
@@ -109,8 +105,6 @@ Maui.SettingsDialog
                             settings.preventClosing = false
                             settings.alertProcess = false
                         }
-
-                        console.log("[station-debug][settings]", "preventClosing=", settings.preventClosing, "alertProcess=", settings.alertProcess, "watchForSilence=", settings.watchForSilence)
                     }
                 }
             }

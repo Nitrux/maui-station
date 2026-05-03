@@ -49,11 +49,8 @@ Maui.ApplicationWindow
                    close.accepted = !settings.restoreSession
                    root.saveSession()
 
-                   console.log("[station-debug][window-close]", "anyTabHasActiveProcess=", anyTabHasActiveProcess(), "preventClosing=", settings.preventClosing, "discard=", root.discard)
-
                    if(anyTabHasActiveProcess() && settings.preventClosing && !root.discard)
                    {
-                       console.log("[station-debug][window-close]", "opening confirmation dialog")
                        openCloseDialog(-1, ()=> {root.discard = true; root.close();})
                        close.accepted = false
                        return
@@ -664,8 +661,6 @@ Maui.ApplicationWindow
                 const tabs = settings.lastSession
                 if(tabs.length)
                 {
-                    console.log("restore", tabs.length)
-                    // root.closeTab(0)
                     restoreSession(tabs)
                     return
                 }
@@ -685,7 +680,6 @@ Maui.ApplicationWindow
 
     function openTab(path : string)
     {
-        console.log("[station-debug][tabs]", "openTab", path, "currentCount=", _layout.count)
         _layout.addTab(_terminalComponent, {'path': path});
         _layout.currentIndex = _layout.count -1
     }
@@ -721,7 +715,6 @@ Maui.ApplicationWindow
 
     function notifyProcessAlert(icon, title, body, actions, systemNotification)
     {
-        console.log("[station-debug][notify]", "icon=", icon, "title=", title, "body=", body, "systemNotification=", systemNotification)
         root.notify(icon, title, body, actions)
 
         if(systemNotification)
@@ -736,16 +729,13 @@ Maui.ApplicationWindow
     function closeTab(index)
     {
         var tab = _layout.tabAt(index)
-        console.log("[station-debug][close-tab]", "index=", index, "hasTab=", !!tab, "hasActiveProcess=", tab ? tab.hasActiveProcess : false, "preventClosing=", settings.preventClosing, "title=", tab ? tab.title : "")
 
         if(tab && tab.hasActiveProcess && settings.preventClosing)
         {
-            console.log("[station-debug][close-tab]", "opening confirmation dialog for tab")
             openCloseDialog(index, _layout.closeTab)
             return
         }
 
-        console.log("[station-debug][close-tab]", "closing tab immediately")
         _layout.closeTab(index)
     }
 
@@ -754,7 +744,6 @@ Maui.ApplicationWindow
         for(var i = 0; i < _layout.count; i++)
         {
             let tab = _layout.tabAt(i)
-            console.log("[station-debug][scan-tabs]", "index=", i, "exists=", !!tab, "hasActiveProcess=", tab ? tab.hasActiveProcess : false, "title=", tab ? tab.title : "")
             if(tab && tab.hasActiveProcess)
             {
                 return true
@@ -791,16 +780,12 @@ Maui.ApplicationWindow
         }
 
         settings.lastSession = tabs
-        console.log("Saving Session", settings.lastSession.length)
 
         // settings.lastTabIndex = currentTabIndex
     }
 
     function restoreSession(tabs)
     {
-        console.log("TRYING TO RESTORE SESSION",tabs )
-
-
         for(var i = 0; i < tabs.length; i++ )
         {
             const tab = tabs[i]
@@ -810,7 +795,6 @@ Maui.ApplicationWindow
                 root.openTab(tab[0].path, tab[1].path)
             }else
             {
-                console.log("TRYING TO RESTORE SESSION", tab[0].path)
                 root.openTab(tab[0].path)
             }
         }
@@ -820,7 +804,6 @@ Maui.ApplicationWindow
 
     function openCloseDialog(index, cb)
     {
-        console.log("[station-debug][dialog]", "openCloseDialog", "index=", index)
         var props = ({
                          'index' : index,
                          'cb' : cb

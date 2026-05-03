@@ -103,11 +103,7 @@ Maui.SplitViewItem
         interval: 1500
         repeat: false
         running: true
-        onTriggered:
-        {
-            control.startupNotificationsSuppressed = false
-            console.log("[station-debug][terminal]", "startup notification suppression ended", "path=", control.path, "foreground=", control.foregroundProcessName, "rawHasActiveProcess=", control.rawHasActiveProcess)
-        }
+        onTriggered: control.startupNotificationsSuppressed = false
     }
 
     Term.Terminal
@@ -172,21 +168,10 @@ Maui.SplitViewItem
         {
             target: _terminal.session
 
-            function onBellRequest(message)
-            {
-                console.log("Bell REQUESTED!!!", message);
-            }
-
             function onProcessHasSilent(value)
             {
-                console.log("[station-debug][terminal]", "process silence state", "path=", control.path, "value=", value, "rawHasActiveProcess=", control.rawHasActiveProcess, "hasActiveProcess=", control.hasActiveProcess, "foreground=", control.foregroundProcessName)
                 if(control.watchForSilence && value && control.hasActiveProcess)
                     control.silenceWarning()
-            }
-
-            function onHasActiveProcessChanged()
-            {
-                console.log("[station-debug][terminal]", "hasActiveProcessChanged", "path=", control.path, "rawHasActiveProcess=", control.rawHasActiveProcess, "hasActiveProcess=", control.hasActiveProcess, "foreground=", control.foregroundProcessName, "previousForeground=", control.previousForegroundProcessName)
             }
 
             function onForegroundProcessNameChanged()
@@ -198,17 +183,6 @@ Maui.SplitViewItem
                         && control.isCommandProcessName(previousProcess)
                         && !control.isBootstrapProcessName(previousProcess)
                         && control.isShellProcessName(process)
-
-                console.log("[station-debug][terminal]", "foregroundProcessNameChanged",
-                            "path=", control.path,
-                            "previous=", previousProcess,
-                            "current=", process,
-                            "shell=", control.shellProcessName,
-                            "rawHasActiveProcess=", control.rawHasActiveProcess,
-                            "hasActiveProcess=", control.hasActiveProcess,
-                            "startupNotificationsSuppressed=", control.startupNotificationsSuppressed,
-                            "suppressTaskFinishedNotification=", control.suppressTaskFinishedNotification,
-                            "shouldNotify=", shouldNotify)
 
                 if(shouldNotify)
                 {
@@ -227,8 +201,6 @@ Maui.SplitViewItem
             function onFinished()
             {
                 control.suppressTaskFinishedNotification = true
-                console.log("[station-debug][terminal]", "session finished", "path=", control.path, "currentTabCount=", currentTab.count, "foreground=", control.foregroundProcessName, "rawHasActiveProcess=", control.rawHasActiveProcess)
-                console.log("ASKED TO CLOSE SESSION")
                 if(currentTab.count === 1)
                 {
                     closeTab(currentTabIndex)
