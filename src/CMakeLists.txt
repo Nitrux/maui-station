@@ -18,12 +18,15 @@ qt_add_dbus_adaptor(station_dbus_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Statio
 qt_add_dbus_interface(station_dbus_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Station.xml stationinterface)
 
 qt_add_executable(${PROJECT_NAME}
+    MANUAL_FINALIZATION
     ${station_SRCS}
     ${station_dbus_SRCS}
     ${station_QML_QRC})
 
 qt_add_qml_module(${PROJECT_NAME} URI app.maui.station
     NO_PLUGIN
+    NO_IMPORT_SCAN
+    RESOURCE_PREFIX /
     QML_FILES
     main.qml
     widgets/TutorialDialog.qml
@@ -31,6 +34,9 @@ qt_add_qml_module(${PROJECT_NAME} URI app.maui.station
     widgets/SettingsDialog.qml
     widgets/Terminal.qml
     widgets/TerminalLayout.qml)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 
@@ -48,3 +54,5 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME} ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 install(FILES org.kde.station.desktop DESTINATION ${KDE_INSTALL_APPDIR})
 install(FILES assets/station.svg DESTINATION ${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps)
+
+qt_finalize_target(${PROJECT_NAME})

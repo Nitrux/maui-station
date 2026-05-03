@@ -5,8 +5,16 @@ add_compile_definitions(APP_COPYRIGHT_NOTICE="© 2019-2025 Maui Development Team
 
 project(station LANGUAGES CXX VERSION ${STATION_VERSION})
 
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(FATAL_ERROR "station supports Linux only.")
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
+    add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:-march=x86-64-v3>")
+endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -57,6 +65,9 @@ ecm_setup_version(${STATION_VERSION}
     VARIABLE_PREFIX STATION
     VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/station_version.h")
 
+qt_policy(SET QTP0001 NEW)
+qt_policy(SET QTP0004 NEW)
+
 add_subdirectory(src)
 
 ki18n_install(po)
@@ -67,3 +78,5 @@ feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
+
+qt_finalize_project()

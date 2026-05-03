@@ -2,8 +2,10 @@
 #include <QQmlApplicationEngine>
 #include <QCommandLineParser>
 #include <QQmlContext>
+#include <QDate>
 #include <QIcon>
 #include <QDir>
+#include <QSurfaceFormat>
 #include <MauiKit4/Core/mauiapp.h>
 #include <MauiKit4/Terminal/moduleinfo.h>
 
@@ -22,9 +24,13 @@
 
 int main(int argc, char *argv[])
 {
+    QSurfaceFormat format;
+    format.setAlphaBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(format);
+
     QApplication app(argc, argv);
 
-    app.setOrganizationName("Maui");
+    app.setOrganizationName(QStringLiteral("Maui"));
     app.setWindowIcon(QIcon(":/station/station.svg"));
 
     KLocalizedString::setApplicationDomain("station");
@@ -33,21 +39,19 @@ int main(int argc, char *argv[])
                      STATION_VERSION_STRING,
                      i18n("Convergent terminal emulator."),
                      KAboutLicense::LGPL_V3,
-                     APP_COPYRIGHT_NOTICE,
+                     i18n("© %1 Made by Nitrux | Built with MauiKit", QString::number(QDate::currentDate().year())),
                      QString(GIT_BRANCH) + "/" + QString(GIT_COMMIT_HASH));
-    about.addAuthor(i18n("Camilo Higuita"), i18n("Developer"), QStringLiteral("milo.h@aol.com"));
-    about.setHomepage("https://mauikit.org");
-    about.setProductName("maui/station");
+    about.addAuthor(QStringLiteral("Camilo Higuita"), i18n("Developer"), QStringLiteral("milo.h@aol.com"));
+    about.addAuthor(QStringLiteral("Uri Herrera"), i18n("Developer"), QStringLiteral("uri_herrera@nxos.org"));
+    about.setHomepage("https://nxos.org");
+    about.setProductName("nitrux/station");
     about.setBugAddress("https://invent.kde.org/maui/station/-/issues");
     about.setOrganizationDomain(STATION_URI);
+    about.setDesktopFileName(QStringLiteral("org.kde.station"));
     about.setProgramLogo(app.windowIcon());
 
     const auto TData = MauiKitTerminal::aboutData();
     about.addComponent(TData.name(), MauiKitTerminal::buildVersion(), TData.version(), TData.webAddress());
-
-    about.addCredit("QMLTermWidget");
-    about.addCredit("UBPorts Terminal");
-    about.addCredit("Cutefish Terminal");
 
     KAboutData::setApplicationData(about);
 

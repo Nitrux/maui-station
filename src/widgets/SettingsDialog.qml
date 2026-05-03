@@ -5,8 +5,6 @@ import QtQuick.Layouts
 import org.mauikit.controls as Maui
 import org.mauikit.terminal as Term
 
-import org.maui.station as Station
-
 Maui.SettingsDialog
 {
     id: control
@@ -41,8 +39,6 @@ Maui.SettingsDialog
         Term.ColorSchemesPage
         {
             currentColorScheme: settings.colorScheme
-            enabled: !settings.adaptiveColorScheme
-            
             onCurrentColorSchemeChanged: settings.colorScheme = currentColorScheme
         }
     }
@@ -53,41 +49,69 @@ Maui.SettingsDialog
 
         Maui.SettingsPage
         {
-            title: i18n("Alerts")
+            title: i18n("Tasks")
 
             Maui.FlexSectionItem
             {
-                label1.text: i18n("Running Task")
-                label2.text: i18n("Prevent from closing a running task.")
+                label1.text: i18n("Protect Running Tasks")
+                label2.text: i18n("Ask before closing a tab or split that still has a running task.")
 
                 Switch
                 {
                     checked: settings.preventClosing
-                    onToggled: settings.preventClosing = ! settings.preventClosing
+                    onToggled:
+                    {
+                        settings.preventClosing = checked
+                        if(checked)
+                        {
+                            settings.watchForSilence = false
+                        }
+
+                        console.log("[station-debug][settings]", "preventClosing=", settings.preventClosing, "alertProcess=", settings.alertProcess, "watchForSilence=", settings.watchForSilence)
+                    }
                 }
             }
 
             Maui.FlexSectionItem
             {
                 label1.text: i18n("Finished Task")
-                label2.text: i18n("Emit a notification when a pending process has finished.")
+                label2.text: i18n("Show a toast and send a system notification when a running task finishes.")
 
                 Switch
                 {
                     checked: settings.alertProcess
-                    onToggled: settings.alertProcess = ! settings.alertProcess
+                    onToggled:
+                    {
+                        settings.alertProcess = checked
+                        if(checked)
+                        {
+                            settings.watchForSilence = false
+                        }
+
+                        console.log("[station-debug][settings]", "preventClosing=", settings.preventClosing, "alertProcess=", settings.alertProcess, "watchForSilence=", settings.watchForSilence)
+                    }
                 }
             }
 
             Maui.FlexSectionItem
             {
-                label1.text: i18n("Silent")
-                label2.text: i18n("Emit an alert when a running task has been silent for more than 30 seconds.")
+                label1.text: i18n("Silent Process")
+                label2.text: i18n("Show an alert when a running task has produced no output for more than 30 seconds.")
 
                 Switch
                 {
                     checked: settings.watchForSilence
-                    onToggled: settings.watchForSilence = ! settings.watchForSilence
+                    onToggled:
+                    {
+                        settings.watchForSilence = checked
+                        if(checked)
+                        {
+                            settings.preventClosing = false
+                            settings.alertProcess = false
+                        }
+
+                        console.log("[station-debug][settings]", "preventClosing=", settings.preventClosing, "alertProcess=", settings.alertProcess, "watchForSilence=", settings.watchForSilence)
+                    }
                 }
             }
         }
@@ -96,67 +120,6 @@ Maui.SettingsDialog
     Maui.SectionGroup
     {
         title: i18n("Interface")
-//        description: i18n("Configure the application components and behaviour.")
-
-        Maui.FlexSectionItem
-        {
-            label1.text: i18n("Color")
-            label2.text: i18n("Switch between light and dark colorscheme.")
-
-            Maui.ToolActions
-            {
-                autoExclusive: true
-
-                Action
-                {
-                    text: i18n("Light")
-                    onTriggered: settings.colorStyle = Maui.Style.Light
-                    checked: settings.colorStyle === Maui.Style.Light
-                }
-
-                Action
-                {
-                    text: i18n("Dark")
-                    onTriggered: settings.colorStyle = Maui.Style.Dark
-                    checked: settings.colorStyle === Maui.Style.Dark
-                }
-
-
-                Action
-                {
-                    text: i18n("Adaptive")
-                    onTriggered:
-                    {
-                        settings.colorStyle = Maui.Style.Adaptive
-                    }
-
-                    checked: settings.colorStyle === Maui.Style.Adaptive
-                }/*
-
-                Action
-                {
-                    text: i18n("System")
-                    onTriggered:
-                    {
-                        settings.colorStyle = undefined
-                    }
-
-                    checked: Maui.Style.styleType === 'undefined'
-                }*/
-            }
-        }
-
-        Maui.FlexSectionItem
-        {
-            label1.text: i18n("Shortcuts")
-            label2.text: i18n("Enable the sidebar with commands and places shortcuts.")
-
-            Switch
-            {
-                checked: settings.enableSideBar
-                onToggled: settings.enableSideBar = !settings.enableSideBar
-            }
-        }
 
         Maui.FlexSectionItem
         {
@@ -223,23 +186,8 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Adaptive Color Scheme")
-            label2.text: i18n("Colors based on the current style.")
-
-            Switch
-            {
-                checkable: true
-                checked:  settings.adaptiveColorScheme
-                onToggled: settings.adaptiveColorScheme = ! settings.adaptiveColorScheme
-            }
-
-        }
-
-        Maui.FlexSectionItem
-        {
             label1.text: i18n("Color Scheme")
             label2.text: i18n("Change the color scheme of the terminal.")
-            enabled: !settings.adaptiveColorScheme
 
             ToolButton
             {
@@ -251,8 +199,8 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Alerts")
-            label2.text: i18n("Alert on processes and prevent closing them.")
+            label1.text: i18n("Tasks")
+            label2.text: i18n("Notifications and safeguards for running processes.")
 
             ToolButton
             {
@@ -296,57 +244,31 @@ Maui.SettingsDialog
         Maui.FlexSectionItem
         {
             label1.text:  i18n("History Size")
-            label2.text: i18n("Number of lines to keep in buffer. Less than zero means infinite lines.")
+            label2.text: i18n("Choose whether to keep no scrollback, 1,000 lines, or an unlimited history.")
 
-            SpinBox
+            ComboBox
             {
-                from: -1; to : 9999
-                value: settings.historySize
-                onValueChanged: settings.historySize = value
-            }
-        }
-
-        Maui.FlexSectionItem
-        {
-            label1.text:  i18n("Enable Bold")
-
-            Switch
-            {
-               checked: settings.enableBold
-               onToggled:  settings.enableBold = !settings.enableBold
-            }
-        }
-
-        Maui.FlexSectionItem
-        {
-            label1.text:  i18n("Blinking Cursor")
-
-            Switch
-            {
-               checked: settings.blinkingCursor
-               onToggled:  settings.blinkingCursor = !settings.blinkingCursor
-            }
-        }
-
-        Maui.FlexSectionItem
-        {
-            label1.text:  i18n("Full Cursor Height")
-
-            Switch
-            {
-               checked: settings.fullCursorHeight
-               onToggled:  settings.fullCursorHeight = !settings.fullCursorHeight
-            }
-        }
-
-        Maui.FlexSectionItem
-        {
-            label1.text:  i18n("Antialias text")
-
-            Switch
-            {
-               checked: settings.antialiasText
-               onToggled:  settings.antialiasText = !settings.antialiasText
+                model: [
+                    i18n("Off"),
+                    i18n("1,000 Lines"),
+                    i18n("Infinite")
+                ]
+                currentIndex: settings.historySize < 0 ? 2 : (settings.historySize === 0 ? 0 : 1)
+                onActivated:
+                {
+                    switch (currentIndex)
+                    {
+                    case 0:
+                        settings.historySize = 0
+                        break
+                    case 1:
+                        settings.historySize = 1000
+                        break
+                    default:
+                        settings.historySize = -1
+                        break
+                    }
+                }
             }
         }
     }

@@ -7,7 +7,6 @@ import QtQuick.Layouts
 import org.mauikit.controls as Maui
 import org.mauikit.terminal as Term
 import org.mauikit.filebrowsing as FB
-
 import org.maui.station as Station
 
 import "widgets"
@@ -15,34 +14,46 @@ import "widgets"
 Maui.ApplicationWindow
 {
     id: root
-
-    Maui.Style.styleType: settings.colorStyle
+    color: "transparent"
+    background: null
 
     title: currentTerminal? currentTerminal.session.title : ""
 
     readonly property alias currentTab : _layout.currentItem
 
-    readonly property Term.Terminal currentTerminal : currentTab.currentItem.terminal
+    readonly property Term.Terminal currentTerminal : currentTab && currentTab.currentItem ? currentTab.currentItem.terminal : null
     readonly property font defaultFont : Maui.Style.monospacedFont
     readonly property alias currentTabIndex : _layout.currentIndex
-    readonly property CommandShortcuts shortcutsPage : _sideBarLoader.item ?  _sideBarLoader.item.shortcutsPage : null
 
     Maui.WindowBlur
     {
         view: root
-        geometry: Qt.rect(root.x, root.y, root.width, root.height)
+        geometry: Qt.rect(0, 0, root.width, root.height)
         windowRadius: Maui.Style.radiusV
-        enabled: !Maui.Handy.isMobile && settings.windowTranslucency
+        enabled: true
     }
 
-    property bool discard : !settings.preventClosing
+    Rectangle
+    {
+        anchors.fill: parent
+        color: Maui.Theme.backgroundColor
+        opacity: 0.76
+        radius: Maui.Style.radiusV
+        border.color: Qt.rgba(1, 1, 1, 0)
+        border.width: 1
+    }
+
+    property bool discard : false
     onClosing: (close) =>
                {
                    close.accepted = !settings.restoreSession
                    root.saveSession()
 
-                   if(anyTabHasActiveProcess() && !root.discard)
+                   console.log("[station-debug][window-close]", "anyTabHasActiveProcess=", anyTabHasActiveProcess(), "preventClosing=", settings.preventClosing, "discard=", root.discard)
+
+                   if(anyTabHasActiveProcess() && settings.preventClosing && !root.discard)
                    {
+                       console.log("[station-debug][window-close]", "opening confirmation dialog")
                        openCloseDialog(-1, ()=> {root.discard = true; root.close();})
                        close.accepted = false
                        return
@@ -58,23 +69,16 @@ Maui.ApplicationWindow
         property string colorScheme: "Maui-Dark"
 
         property int lineSpacing : 0
-        property int historySize : -1
+        property int historySize : 1000
 
         property font font : defaultFont
         property int keysModelCurrentIndex : 4
-        property int colorStyle : Maui.Style.Dark
 
         property double windowOpacity: 0.8
         property bool windowTranslucency: false
 
-        property bool adaptiveColorScheme : true
         property bool preventClosing: true
         property bool alertProcess: true
-
-        property bool enableBold: true
-        property bool blinkingCursor: true
-        property bool fullCursorHeight: true
-        property bool antialiasText: true
 
         property bool showSignalBar: false
         property bool watchForSilence: false
@@ -83,13 +87,11 @@ Maui.ApplicationWindow
         property var lastSession: []
         property int lastTabIndex : 0
         property int tabTitleStyle: Terminal.TabTitle.Auto
-
-        property bool enableSideBar : true
     }
 
     Component
     {
-        id: _tutorialDialogComponent
+        id: _shortcutsDialogComponent
         TutorialDialog
         {
             onClosed: destroy()
@@ -105,6 +107,90 @@ Maui.ApplicationWindow
         }
     }
 
+    Maui.Notify
+    {
+        id: _processNotify
+        componentName: "org.kde.station"
+        eventId: "processAlert"
+    }
+
+    Component
+    {
+        id: _tabsCounterButtonComponent
+        ToolButton
+        {
+            text: _layout.count
+            display: ToolButton.TextOnly
+            font.bold: true
+            font.pointSize: Maui.Style.fontSizes.small
+            onClicked: _layout.openOverview()
+
+            background: Rectangle
+            {
+                color: Maui.Theme.alternateBackgroundColor
+                radius: Maui.Style.radiusV
+            }
+
+            ToolTip.delay: 1000
+            ToolTip.timeout: 5000
+            ToolTip.visible: hovered
+            ToolTip.text: i18n("Tab Overview")
+        }
+    }
+
+    Shortcut
+    {
+        sequence: "Ctrl+Shift+T"
+        context: Qt.ApplicationShortcut
+        onActivated: root.openTab("$PWD")
+    }
+
+    Shortcut
+    {
+        sequence: "Ctrl+Shift+E"
+        context: Qt.ApplicationShortcut
+        enabled: !!root.currentTab
+        onActivated: root.currentTab.split()
+    }
+
+    Shortcut
+    {
+        sequence: "Ctrl+Shift+F"
+        context: Qt.ApplicationShortcut
+        enabled: !!root.currentTerminal
+        onActivated: root.currentTerminal.toggleSearchBar()
+    }
+
+    Shortcut
+    {
+        sequence: "F6"
+        context: Qt.ApplicationShortcut
+        enabled: !!root.currentTab && root.currentTab.count > 1
+        onActivated: root.focusNextSplit()
+    }
+
+    Shortcut
+    {
+        sequence: "Ctrl+Shift+W"
+        context: Qt.ApplicationShortcut
+        enabled: _layout.count > 0
+        onActivated: root.closeTab(root.currentTabIndex)
+    }
+
+    Shortcut
+    {
+        sequence: "Ctrl+/"
+        context: Qt.ApplicationShortcut
+        onActivated: root.openShortcutsDialog()
+    }
+
+    Shortcut
+    {
+        sequence: "Ctrl+,"
+        context: Qt.ApplicationShortcut
+        onActivated: root.openSettingsDialog()
+    }
+
     Maui.SideBarView
     {
         id: _sideBarView
@@ -114,11 +200,7 @@ Maui.ApplicationWindow
         sideBar.autoHide: true
         sideBar.collapsed: !root.isWide
 
-        background: Rectangle
-        {
-            color: currentTerminal.kterminal.backgroundColor
-            opacity: _layout.count === 0 ? 1 : (settings.windowTranslucency ? settings.windowOpacity : 1)
-        }
+        background: null
 
         sideBarContent: Loader
         {
@@ -126,13 +208,16 @@ Maui.ApplicationWindow
             anchors.fill: parent
             anchors.margins: Maui.Style.defaultPadding
 
-            active: settings.enableSideBar || item
+            active: false
             asynchronous: true
             sourceComponent: Maui.Page
             {
                 property alias shortcutsPage : _shortcutsPage
-                background: Rectangle
+                background: null
+
+                Rectangle
                 {
+                    anchors.fill: parent
                     color: Maui.Theme.alternateBackgroundColor
                     radius: Maui.Style.radiusV
                     opacity: _layout.count === 0 ? 1 : (settings.windowTranslucency ? settings.windowOpacity : 1)
@@ -176,6 +261,11 @@ Maui.ApplicationWindow
                             background: null
                             onCommandTriggered: (command, autorun) =>
                                                 {
+                                                    if(!root.currentTerminal || !root.currentTerminal.session)
+                                                    {
+                                                        return
+                                                    }
+
                                                     root.currentTerminal.session.sendText("\x05\x15")
 
                                                     root.currentTerminal.session.sendText(command)
@@ -203,12 +293,15 @@ Maui.ApplicationWindow
 
                         FB.PlacesListBrowser
                         {
-                            currentPath:  "file://"+root.currentTerminal.session.currentDir
+                            currentPath: root.currentTerminal && root.currentTerminal.session ? "file://" + root.currentTerminal.session.currentDir : "file://"
 
                             anchors.fill: parent
                             onPlaceClicked:  (path) =>
                                              {
-                                                 root.currentTerminal.session.changeDir(path.replace("file://", ""))
+                                                 if(root.currentTerminal && root.currentTerminal.session)
+                                                 {
+                                                     root.currentTerminal.session.changeDir(path.replace("file://", ""))
+                                                 }
 
                                                  // root.currentTerminal.forceActiveFocus()
                                              }
@@ -222,12 +315,7 @@ Maui.ApplicationWindow
         {
             anchors.fill: parent
             headBar.visible: false
-
-            background: Rectangle
-            {
-                color: Maui.Theme.backgroundColor
-                opacity: _layout.count === 0 ? 1 : 0
-            }
+            background: null
 
             Maui.TabView
             {
@@ -241,6 +329,25 @@ Maui.ApplicationWindow
 
                 onNewTabClicked: root.openTab("$PWD")
                 onCloseTabClicked:(index) => root.closeTab(index)
+                tabViewButton: Maui.TabViewButton
+                {
+                    id: _tabButton
+                    tabView: _layout
+                    closeButtonVisible: !_layout.mobile
+
+                    onClicked:
+                    {
+                        _layout.setCurrentIndex(_tabButton.mindex)
+
+                        if(_layout.currentItem)
+                        {
+                            _layout.currentItem.forceActiveFocus()
+                        }
+                    }
+
+                    onRightClicked: _layout.openTabMenu(_tabButton.mindex)
+                    onCloseClicked: _layout.closeTabClicked(_tabButton.mindex)
+                }
 
                 tabBarMargins: Maui.Style.defaultPadding
                 tabBar.showNewTabButton: false
@@ -252,79 +359,94 @@ Maui.ApplicationWindow
                     radius: Maui.Style.radiusV
                 }
 
-                tabBar.leftContent: Loader
-                {
-                    active: settings.enableSideBar
-                    asynchronous: true
-                    sourceComponent: ToolButton
+                tabBar.leftContent: [
+                    ToolButton
                     {
-                        icon.name: "document-edit"
-                        checked: _sideBarView.sideBar.visible
-                        onClicked: _sideBarView.sideBar.toggle()
-                    }
-                }
+                        icon.name: "tab-new"
+                        display: ToolButton.IconOnly
+                        Maui.Controls.toolTipText: i18n("New Tab")
+                        onClicked: root.openTab("$PWD")
+                    },
 
-                tabBar.content: [
+                    ToolButton
+                    {
+                        enabled: !!root.currentTab
+                        checkable: true
+                        checked: enabled && root.currentTab.count === 2
+                        icon.name: root.currentTab && root.currentTab.orientation === Qt.Horizontal ? "view-split-left-right" : "view-split-top-bottom"
+                        display: ToolButton.IconOnly
+                        Maui.Controls.toolTipText: i18n("Split")
+                        onClicked:
+                        {
+                            if(root.currentTab)
+                            {
+                                root.currentTab.split()
+                            }
+                        }
+                    },
+
+                    ToolSeparator
+                    {
+                        visible: _layout.count > 0
+                        topPadding: 10
+                        bottomPadding: 10
+                    },
+
+                    Loader
+                    {
+                        active: _layout.count > 1
+                        visible: active
+                        asynchronous: true
+                        sourceComponent: _tabsCounterButtonComponent
+                    }
+                ]
+
+                tabBar.rightContent: [
+                    ToolSeparator
+                    {
+                        visible: _layout.count > 0
+                        topPadding: 10
+                        bottomPadding: 10
+                    },
 
                     ToolButton
                     {
                         icon.name: "edit-find"
-                        checked: root.currentTerminal.footBar.visible
-                        onClicked: root.currentTerminal.toggleSearchBar()
+                        display: ToolButton.IconOnly
+                        Maui.Controls.toolTipText: i18n("Search")
+                        checked: root.currentTerminal ? root.currentTerminal.footBar.visible : false
+                        onClicked:
+                        {
+                            if(root.currentTerminal)
+                            {
+                                root.currentTerminal.toggleSearchBar()
+                            }
+                        }
+                    },
+
+                    ToolSeparator
+                    {
+                        visible: _layout.count > 0
+                        topPadding: 10
+                        bottomPadding: 10
                     },
 
                     Maui.ToolButtonMenu
                     {
-                        icon.name: "list-add"
+                        icon.name: "overflow-menu"
 
                         MenuItem
                         {
-                            icon.name: "tab-new"
-                            text: i18n("New Tab")
-                            onTriggered: root.openTab("$PWD")
-                            action: Action
-                            {
-                                shortcut: "Ctrl+Shift+T"
-                            }
-                        }
-
-                        MenuItem
-                        {
-                            enabled: root.currentTab
-                            checked: root.currentTab && root.currentTab.count === 2
-                            checkable: true
-                            text: i18n("Split")
-
-                            icon.name: root.currentTab.orientation === Qt.Horizontal ? "view-split-left-right" : "view-split-top-bottom"
-                            onTriggered: root.currentTab.split()
-                            action: Action
-                            {
-                                shortcut: "Ctrl+Shift+→"
-                            }
-                        }
-
-                        MenuSeparator {}
-
-                        MenuItem
-                        {
-                            text: i18n("Tutorial")
-                            onTriggered:
-                            {
-                                var dialog = _tutorialDialogComponent.createObject(root)
-                                dialog.open()
-                            }
-                            icon.name : "help-contents"
+                            text: i18n("Shortcuts")
+                            icon.name: "configure-shortcuts"
+                            onTriggered: root.openShortcutsDialog()
                         }
 
                         MenuItem
                         {
                             icon.name: "settings-configure"
                             text: i18n("Settings")
-                            onTriggered:
-                            {
-                                var dialog = _settingsDialogComponent.createObject(root)
-                                dialog.open()
-                            }
+                            onTriggered: root.openSettingsDialog()
                         }
 
                         MenuItem
@@ -336,15 +458,15 @@ Maui.ApplicationWindow
                     }
                 ]
 
-                holder.visible: _layout.count === 0
-                holder.emoji: "terminal-symbolic"
-                holder.title: i18n("Nothing here")
-                holder.body: i18n("To start hacking open a new tab or a split screen.")
-                holder.actions: Action
-                {
-                    text: i18n("New Tab")
-                    onTriggered: root.openTab("$PWD")
-                }
+            }
+
+            Maui.Holder
+            {
+                anchors.fill: parent
+                visible: _layout.count === 0
+                emoji: "utilities-terminal"
+                title: i18n("Run a Command")
+                body: i18n("Open a new tab or split view to start exectuing commands.")
             }
 
             footBar.visible: Maui.Handy.isMobile || Maui.Handy.isTouch
@@ -426,7 +548,7 @@ Maui.ApplicationWindow
             footerColumn: Maui.ToolBar
             {
                 visible: settings.showSignalBar
-                width: parent.width
+                width: parent ? parent.width : 0
                 position: ToolBar.Footer
 
                 Repeater
@@ -438,7 +560,13 @@ Maui.ApplicationWindow
                         font.bold: true
                         text: modelData.label + "/ " + modelData.signal
 
-                        onClicked: currentTerminal.session.sendSignal(9)
+                        onClicked:
+                        {
+                            if(currentTerminal && currentTerminal.session)
+                            {
+                                currentTerminal.session.sendSignal(9)
+                            }
+                        }
 
                         activeFocusOnTab: false
                         focusPolicy: Qt.NoFocus
@@ -462,7 +590,13 @@ Maui.ApplicationWindow
                         text: model.label
                         icon.name: model.iconName
 
-                        onClicked: _keysModel.sendKey(index, currentTerminal.kterminal)
+                        onClicked:
+                        {
+                            if(currentTerminal)
+                            {
+                                _keysModel.sendKey(index, currentTerminal.kterminal)
+                            }
+                        }
 
                         activeFocusOnTab: false
                         focusPolicy: Qt.NoFocus
@@ -551,20 +685,67 @@ Maui.ApplicationWindow
 
     function openTab(path : string)
     {
+        console.log("[station-debug][tabs]", "openTab", path, "currentCount=", _layout.count)
         _layout.addTab(_terminalComponent, {'path': path});
         _layout.currentIndex = _layout.count -1
+    }
+
+    function focusNextSplit()
+    {
+        if(!root.currentTab || root.currentTab.count <= 1)
+        {
+            return
+        }
+
+        root.currentTab.incrementCurrentIndex()
+        Qt.callLater(function()
+        {
+            if(root.currentTerminal)
+            {
+                root.currentTerminal.forceActiveFocus()
+            }
+        })
+    }
+
+    function openShortcutsDialog()
+    {
+        var dialog = _shortcutsDialogComponent.createObject(root)
+        dialog.open()
+    }
+
+    function openSettingsDialog()
+    {
+        var dialog = _settingsDialogComponent.createObject(root)
+        dialog.open()
+    }
+
+    function notifyProcessAlert(icon, title, body, actions, systemNotification)
+    {
+        console.log("[station-debug][notify]", "icon=", icon, "title=", title, "body=", body, "systemNotification=", systemNotification)
+        root.notify(icon, title, body, actions)
+
+        if(systemNotification)
+        {
+            _processNotify.iconName = icon
+            _processNotify.title = title
+            _processNotify.message = body
+            _processNotify.send()
+        }
     }
 
     function closeTab(index)
     {
         var tab = _layout.tabAt(index)
+        console.log("[station-debug][close-tab]", "index=", index, "hasTab=", !!tab, "hasActiveProcess=", tab ? tab.hasActiveProcess : false, "preventClosing=", settings.preventClosing, "title=", tab ? tab.title : "")
 
         if(tab && tab.hasActiveProcess && settings.preventClosing)
         {
+            console.log("[station-debug][close-tab]", "opening confirmation dialog for tab")
             openCloseDialog(index, _layout.closeTab)
             return
         }
 
+        console.log("[station-debug][close-tab]", "closing tab immediately")
         _layout.closeTab(index)
     }
 
@@ -573,6 +754,7 @@ Maui.ApplicationWindow
         for(var i = 0; i < _layout.count; i++)
         {
             let tab = _layout.tabAt(i)
+            console.log("[station-debug][scan-tabs]", "index=", i, "exists=", !!tab, "hasActiveProcess=", tab ? tab.hasActiveProcess : false, "title=", tab ? tab.title : "")
             if(tab && tab.hasActiveProcess)
             {
                 return true
@@ -594,6 +776,11 @@ Maui.ApplicationWindow
             for(var j = 0; j < tab.count; j ++)
             {
                 const term = tab.contentModel.get(j)
+                if(!term || !term.session)
+                {
+                    continue
+                }
+
                 var path = String(term.session.currentDir)
                 const tabMap = {'path': path}
 
@@ -633,6 +820,7 @@ Maui.ApplicationWindow
 
     function openCloseDialog(index, cb)
     {
+        console.log("[station-debug][dialog]", "openCloseDialog", "index=", index)
         var props = ({
                          'index' : index,
                          'cb' : cb
