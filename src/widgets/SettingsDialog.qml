@@ -24,9 +24,9 @@ Maui.SettingsDialog
                 mfont: settings.font
                 model.onlyMonospaced: true
 
-                onFontModified:
+                onFontModified: function(selectedFont)
                 {
-                    settings.font = font
+                    settings.font = selectedFont
                 }
             }
         }
