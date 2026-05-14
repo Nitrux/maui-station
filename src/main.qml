@@ -410,6 +410,13 @@ Maui.ApplicationWindow
                         visible: active
                         asynchronous: true
                         sourceComponent: _tabsCounterButtonComponent
+                    },
+
+                    ToolSeparator
+                    {
+                        visible: _layout.count > 1
+                        topPadding: 10
+                        bottomPadding: 10
                     }
                 ]
 
