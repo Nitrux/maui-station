@@ -8,7 +8,7 @@ Maui.SplitViewItem
 {
     id: control
     Maui.Controls.title: title
-    Maui.Controls.badgeText: hasActiveProcess ? "!" : ""
+    Maui.Controls.badgeText: ""
 
     readonly property string shellProcessName : normalizedProcessName(session.shellProgram)
     readonly property string foregroundProcessName : normalizedProcessName(session.foregroundProcessName)
@@ -17,6 +17,7 @@ Maui.SplitViewItem
                                              && (foregroundProcessName.length === 0
                                                  || (isCommandProcessName(foregroundProcessName)
                                                      && !isBootstrapProcessName(foregroundProcessName)))
+    readonly property bool hasRootProcess : hasActiveProcess && foregroundProcessName === "sudo"
 
     property string path : "$HOME"
     property bool watchForSilence : false
@@ -87,7 +88,7 @@ Maui.SplitViewItem
                                      }
     readonly property alias kterminal : _terminal.kterminal
 
-    property color tabColor : session.foregroundProcessName.startsWith("sudo") ? "red" : "transparent"
+    property color tabColor : hasRootProcess ? Maui.Theme.negativeBackgroundColor : "transparent"
 
     signal silenceWarning()
     signal taskFinished(string commandName)

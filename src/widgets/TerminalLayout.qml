@@ -11,15 +11,17 @@ Maui.SplitView
 
     property string path : "$PWD"
 
-    readonly property bool hasActiveProcess : count === 2 ?  contentModel.get(0).hasActiveProcess || contentModel.get(1).hasActiveProcess : currentItem.hasActiveProcess
+    readonly property bool hasActiveProcess : count === 2 ?  contentModel.get(0).hasActiveProcess || contentModel.get(1).hasActiveProcess : (currentItem ? currentItem.hasActiveProcess : false)
+    readonly property bool hasRootProcess : count === 2 ?  contentModel.get(0).hasRootProcess || contentModel.get(1).hasRootProcess : (currentItem ? currentItem.hasRootProcess : false)
 
     readonly property bool isCurrentTab : SwipeView.isCurrentItem
 
-    readonly property string title : count === 2 ?  contentModel.get(0).title  + " - " + contentModel.get(1).title : currentItem.title
+    readonly property string title : count === 2 ?  contentModel.get(0).title  + " - " + contentModel.get(1).title : (currentItem ? currentItem.title : "")
+    readonly property color tabColor : hasRootProcess ? Maui.Theme.negativeBackgroundColor : "transparent"
 
     Maui.Controls.title: title
-    Maui.Controls.toolTipText: currentItem.session.currentDir
-    Maui.Controls.color: currentItem.tabColor
+    Maui.Controls.toolTipText: currentItem ? currentItem.session.currentDir : ""
+    Maui.Controls.color: tabColor
     Maui.Controls.iconName: control.hasActiveProcess ? "run-build" : ""
     Maui.Controls.badgeText: count === 2 ? "[|]" : ""
 

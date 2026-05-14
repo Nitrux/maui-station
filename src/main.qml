@@ -331,6 +331,21 @@ Maui.ApplicationWindow
                     id: _tabButton
                     tabView: _layout
                     closeButtonVisible: !_layout.mobile
+                    // Hide the built-in color strip so we can locally tune its thickness.
+                    color: "transparent"
+
+                    readonly property bool _isSuperUserTab : tabInfo.color
+                                                            && tabInfo.color.toString() === Maui.Theme.negativeBackgroundColor.toString()
+
+                    Rectangle
+                    {
+                        parent: _tabButton.background
+                        color: _tabButton.tabInfo.color ? _tabButton.tabInfo.color : "transparent"
+                        height: _tabButton._isSuperUserTab ? 1 : 2
+                        width: parent.width * 0.9
+                        anchors.bottom: parent.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
 
                     onClicked:
                     {
