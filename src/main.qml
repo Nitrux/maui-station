@@ -321,6 +321,7 @@ Maui.ApplicationWindow
                 background: null
                 altTabBar: Maui.Handy.isMobile
                 Maui.Controls.showCSD: true
+                showDefaultMenuEntries: false
 
                 anchors.fill: parent
 
@@ -331,6 +332,15 @@ Maui.ApplicationWindow
                     id: _tabButton
                     tabView: _layout
                     closeButtonVisible: !_layout.mobile
+                    readonly property var _tabMenuActions:
+                    {
+                        const actions = []
+                        if (_tabButton.mindex > 0)
+                            actions.push(_moveTabLeftAction)
+                        if (_tabButton.mindex >= 0 && _tabButton.mindex < (_tabButton.tabView.count - 1))
+                            actions.push(_moveTabRightAction)
+                        return actions
+                    }
                     // Hide the built-in color strip so we can locally tune its thickness.
                     color: "transparent"
 
@@ -357,8 +367,48 @@ Maui.ApplicationWindow
                         }
                     }
 
-                    onRightClicked: _layout.openTabMenu(_tabButton.mindex)
+                    onRightClicked: _tabMenu.show()
                     onCloseClicked: _layout.closeTabClicked(_tabButton.mindex)
+
+                    Action
+                    {
+                        id: _moveTabLeftAction
+                        text: i18n("Move Left")
+                        icon.name: "go-previous"
+                        onTriggered:
+                        {
+                            const from = _tabButton.mindex
+                            if (from > 0)
+                                _layout.moveTab(from, from - 1)
+                        }
+                    }
+
+                    Action
+                    {
+                        id: _moveTabRightAction
+                        text: i18n("Move Right")
+                        icon.name: "go-next"
+                        onTriggered:
+                        {
+                            const from = _tabButton.mindex
+                            if (from >= 0 && from < (_layout.count - 1))
+                                _layout.moveTab(from, from + 1)
+                        }
+                    }
+
+                    Maui.ContextualMenu
+                    {
+                        id: _tabMenu
+
+                        Repeater
+                        {
+                            model: _tabButton._tabMenuActions
+                            delegate: MenuItem
+                            {
+                                action: modelData
+                            }
+                        }
+                    }
                 }
 
                 tabBarMargins: Maui.Style.defaultPadding
