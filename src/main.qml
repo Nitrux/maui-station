@@ -331,6 +331,29 @@ Maui.ApplicationWindow
                 {
                     id: _tabButton
                     tabView: _layout
+                    // Keep a stable fallback index from the Repeater context.
+                    property int delegateIndex: (typeof index != "undefined" && index >= 0) ? index : -1
+                    readonly property int mindex:
+                        ((typeof _tabButton.TabBar.index !== "undefined" && _tabButton.TabBar.index >= 0)
+                            ? _tabButton.TabBar.index
+                            : (_tabButton.delegateIndex >= 0
+                                ? _tabButton.delegateIndex
+                                : ((typeof index !== "undefined" && index >= 0) ? index : -1)))
+                    // Force reevaluation of model-derived bindings after tab moves.
+                    readonly property int _modelPulse: _tabButton.tabView ? (_tabButton.tabView.currentIndex + _tabButton.tabView.count) : 0
+                    readonly property var tabInfo:
+                    {
+                        const _pulse = _tabButton._modelPulse
+                        const item = _tabButton.tabView && _tabButton.tabView.contentModel ? _tabButton.tabView.contentModel.get(_tabButton.mindex) : null
+                        return item && item.Maui && item.Maui.Controls ? item.Maui.Controls : ({})
+                    }
+                    text: tabInfo.title ? tabInfo.title : ""
+                    icon.name: tabInfo.iconName ? tabInfo.iconName : ""
+                    Maui.Controls.badgeText: tabInfo.badgeText ? tabInfo.badgeText : ""
+                    Maui.Controls.status: tabInfo.status
+                    ToolTip.text: tabInfo.toolTipText ? tabInfo.toolTipText : ""
+                    Drag.active: false
+                    Drag.dragType: Drag.None
                     closeButtonVisible: !_layout.mobile
                     readonly property var _tabMenuActions:
                     {
@@ -367,7 +390,13 @@ Maui.ApplicationWindow
                         }
                     }
 
-                    onRightClicked: _tabMenu.show()
+                    onRightClicked:
+                    {
+                        if (_tabButton._tabMenuActions.length > 0)
+                        {
+                            _tabMenu.show()
+                        }
+                    }
                     onCloseClicked: _layout.closeTabClicked(_tabButton.mindex)
 
                     Action

@@ -24,6 +24,7 @@ Maui.SplitViewItem
     property string previousForegroundProcessName : ""
     property bool suppressTaskFinishedNotification : false
     property bool startupNotificationsSuppressed : true
+    readonly property real _collapsedMenuRowHeight : -Maui.Style.defaultSpacing
 
     function forceActiveFocus()
     {
@@ -141,14 +142,14 @@ Maui.SplitViewItem
             MenuSeparator
             {
                 visible: kterminal.isTextSelected
-                height: visible ? implicitHeight : 0
+                height: visible ? implicitHeight : _collapsedMenuRowHeight
             },
 
             MenuItem
             {
                 enabled: kterminal.isTextSelected && Maui.Handy.isEmail(kterminal.selectedText())
                 visible: enabled
-                height: visible ? implicitHeight : 0
+                height: visible ? implicitHeight : _collapsedMenuRowHeight
                 text: i18n("Email")
                 icon.name: "mail"
                 onTriggered: Qt.openUrlExternally("mailto="+kterminal.selectedText())
@@ -158,7 +159,7 @@ Maui.SplitViewItem
             {
                 enabled: kterminal.isTextSelected
                 visible: enabled
-                height: visible ? implicitHeight : 0
+                height: visible ? implicitHeight : _collapsedMenuRowHeight
                 text: i18n("Search Web")
                 icon.name: "webpage-symbolic"
                 onTriggered: Qt.openUrlExternally("https://www.google.com/search?q="+kterminal.selectedText())
