@@ -76,25 +76,6 @@ Maui.Page
         holder.title: i18n("No Commands")
         holder.body: i18n("Start adding new command shortcuts")
 
-        // footer: Maui.ListBrowserDelegate
-        // {
-        //     width: ListView.view.width
-        //     label1.text: "> " + currentTerminal.session.foregroundProcessName
-        //     label1.font
-        //     {
-        //         pointSize: Maui.Style.fontSizes.medium
-        //         family:  currentTerminal.kterminal.font.family
-        //     }
-
-        //     label1.color: currentTerminal.kterminal.foregroundColor
-
-        //     background: Rectangle
-        //     {
-        //         color: currentTerminal.kterminal.backgroundColor
-        //         radius: Maui.Style.radiusV
-        //     }
-        // }
-
         model: Maui.BaseModel
         {
             list: Station.CommandsModel

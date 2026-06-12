@@ -13,7 +13,6 @@ Maui.SettingsDialog
     {
         Layout.fillWidth: true
         title: i18n("General")
-        description: i18n("Window-level shortcuts for managing tabs and opening Station dialogs.")
 
         Maui.FlexSectionItem
         {
@@ -78,12 +77,10 @@ Maui.SettingsDialog
     {
         Layout.fillWidth: true
         title: i18n("Terminal")
-        description: i18n("Shortcuts that act on the active terminal tab or split.")
 
         Maui.FlexSectionItem
         {
             label1.text: i18n("Find")
-            label2.text: i18n("Open the terminal search bar.")
 
             Maui.ToolActions
             {
@@ -99,7 +96,6 @@ Maui.SettingsDialog
         Maui.FlexSectionItem
         {
             label1.text: i18n("Toggle Split View")
-            label2.text: i18n("Open or close a second split in the current tab.")
 
             Maui.ToolActions
             {
@@ -115,7 +111,6 @@ Maui.SettingsDialog
         Maui.FlexSectionItem
         {
             label1.text: i18n("Next Split")
-            label2.text: i18n("Move focus to the next split in the current tab.")
 
             Maui.ToolActions
             {
@@ -131,12 +126,10 @@ Maui.SettingsDialog
     {
         Layout.fillWidth: true
         title: i18n("Navigation")
-        description: i18n("On touch devices you can use the following gestures to navigate.")
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Up & Down")
-            label2.text: i18n("Swipe up or down to navigate the commands history.")
+            label1.text: i18n("Up and Down")
 
             Maui.ToolActions
             {
@@ -151,8 +144,7 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Left & Right")
-            label2.text: i18n("Swipe left or right to move through the command line to edit.")
+            label1.text: i18n("Left and Right")
 
             Maui.ToolActions
             {
@@ -167,8 +159,7 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Two Fingers Left & Right")
-            label2.text: i18n("Swipe up or down with two fingers to scroll.")
+            label1.text: i18n("Two Fingers Left and Right")
 
             Maui.ToolActions
             {
