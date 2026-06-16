@@ -23,6 +23,7 @@ Maui.SettingsDialog
 
                 mfont: settings.font
                 model.onlyMonospaced: true
+                showStyle: false
 
                 onFontModified: function(selectedFont)
                 {
