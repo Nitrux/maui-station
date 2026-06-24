@@ -577,6 +577,7 @@ Maui.ApplicationWindow
                 sourceComponent: Maui.ToolButtonMenu
                 {
                     icon.name: "overflow-menu"
+
                     MenuItem
                     {
                         text: i18n("Function Keys")
