@@ -130,6 +130,7 @@ Maui.SplitViewItem
         kterminal.lineSpacing: settings.lineSpacing
         kterminal.backgroundOpacity: settings.windowTranslucency ? 0 : 1
         showFindContextMenuAction: false
+        showSelectionPreviewInContextMenu: false
 
         menu: [
             MenuItem
