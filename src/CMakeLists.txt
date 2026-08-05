@@ -52,7 +52,7 @@ target_link_libraries(${PROJECT_NAME}
     KF6::CoreAddons)
 
 install(TARGETS ${PROJECT_NAME} ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
-install(FILES org.kde.station.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(FILES org.maui.station.desktop DESTINATION ${KDE_INSTALL_APPDIR})
 install(FILES assets/station.svg DESTINATION ${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps)
 
 qt_finalize_target(${PROJECT_NAME})

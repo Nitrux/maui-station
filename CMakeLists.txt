@@ -73,7 +73,7 @@ add_subdirectory(src)
 
 ki18n_install(po)
 
-install(FILES org.kde.station.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
+install(FILES org.maui.station.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
 
 if(NOT TARGET uninstall)
     configure_file(

@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     about.setProductName("nitrux/station");
     about.setBugAddress("https://invent.kde.org/maui/station/-/issues");
     about.setOrganizationDomain(STATION_URI);
-    about.setDesktopFileName(QStringLiteral("org.kde.station"));
+    about.setDesktopFileName(QStringLiteral("org.maui.station"));
     about.setProgramLogo(app.windowIcon());
 
     const auto TData = MauiKitTerminal::aboutData();
