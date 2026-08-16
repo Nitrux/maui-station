@@ -176,13 +176,6 @@ Maui.ApplicationWindow
 
     Shortcut
     {
-        sequence: "Ctrl+/"
-        context: Qt.ApplicationShortcut
-        onActivated: root.openShortcutsDialog()
-    }
-
-    Shortcut
-    {
         sequence: "Ctrl+,"
         context: Qt.ApplicationShortcut
         onActivated: root.openSettingsDialog()

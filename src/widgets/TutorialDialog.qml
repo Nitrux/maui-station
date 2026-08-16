@@ -46,20 +46,6 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Show Shortcuts")
-
-            Maui.ToolActions
-            {
-                checkable: false
-                autoExclusive: false
-
-                Action { text: "Ctrl" }
-                Action { text: "/" }
-            }
-        }
-
-        Maui.FlexSectionItem
-        {
             label1.text: i18n("Settings")
 
             Maui.ToolActions
