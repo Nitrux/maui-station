@@ -224,7 +224,7 @@ Maui.ApplicationWindow
                     Action
                     {
                         text: i18n("Commands")
-                        icon.name: "terminal-symbolic"
+                        icon.name: "utilities-terminal"
                         checked: _swipeView.currentIndex === 0
                         onTriggered: _swipeView.setCurrentIndex(0)
                     }

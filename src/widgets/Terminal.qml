@@ -162,7 +162,7 @@ Maui.SplitViewItem
                 visible: enabled
                 height: visible ? implicitHeight : _collapsedMenuRowHeight
                 text: i18n("Search Web")
-                icon.name: "webpage-symbolic"
+                icon.name: "internet-web-browser"
                 onTriggered: Qt.openUrlExternally("https://www.google.com/search?q="+kterminal.selectedText())
             }
         ]
