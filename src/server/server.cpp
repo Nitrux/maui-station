@@ -2,6 +2,7 @@
 
 #include <QGuiApplication>
 #include <QQuickWindow>
+#include <QVariant>
 #include <QQmlApplicationEngine>
 
 #include <MauiKit4/FileBrowsing/fmstatic.h>
@@ -96,6 +97,27 @@ bool AppInstance::attachToExistingInstance(const QList<QUrl>& inputUrls, bool sp
     return attached;
 }
 
+bool AppInstance::attachCommandToExistingInstance(const QString &workingDirectory,
+                                                  const QString &program,
+                                                  const QStringList &arguments,
+                                                  const QString &preferredService)
+{
+    auto interfaces = appInstances(preferredService);
+    if (interfaces.isEmpty())
+        return false;
+
+    for (const auto &interface : std::as_const(interfaces)) {
+        auto reply = interface.first->openCommandTab(workingDirectory, program, arguments);
+        reply.waitForFinished();
+        if (!reply.isError()) {
+            interface.first->activateWindow();
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool AppInstance::registerService()
 {
     QDBusConnectionInterface *iface = QDBusConnection::sessionBus().interface();
@@ -171,6 +193,19 @@ void Server::openNewTab(const QString &url)
     {
         QMetaObject::invokeMethod(m_qmlObject, "openTab",
                                   Q_ARG(QString, url));
+    }
+}
+
+void Server::openCommandTab(const QString &workingDirectory,
+                            const QString &program,
+                            const QStringList &arguments)
+{
+    if (m_qmlObject)
+    {
+        QMetaObject::invokeMethod(m_qmlObject, "openCommandTab",
+                                  Q_ARG(QString, workingDirectory),
+                                  Q_ARG(QString, program),
+                                  Q_ARG(QVariant, QVariant::fromValue(arguments)));
     }
 }
 

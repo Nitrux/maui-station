@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QCommandLineParser>
+#include <QCommandLineOption>
 #include <QQmlContext>
 #include <QDate>
 #include <QIcon>
@@ -60,9 +61,26 @@ int main(int argc, char *argv[])
     QCommandLineParser parser;
 
     about.setupCommandLine(&parser);
+    const QCommandLineOption commandOption(QStringLiteral("command"),
+                                           i18n("Run a command in a new terminal tab."),
+                                           QStringLiteral("program"));
+    const QCommandLineOption argumentOption(QStringLiteral("argument"),
+                                            i18n("Pass an argument to the command."),
+                                            QStringLiteral("argument"));
+    const QCommandLineOption workingDirectoryOption(QStringLiteral("working-directory"),
+                                                    i18n("Set the terminal working directory."),
+                                                    QStringLiteral("path"));
+    parser.addOption(commandOption);
+    parser.addOption(argumentOption);
+    parser.addOption(workingDirectoryOption);
     parser.process(app);
 
     about.processCommandLine(&parser);
+    const QString command = parser.value(commandOption).trimmed();
+    const QStringList commandArguments = parser.values(argumentOption);
+    const QString workingDirectory = parser.value(workingDirectoryOption).trimmed().isEmpty()
+        ? QDir::homePath()
+        : parser.value(workingDirectoryOption).trimmed();
     const QStringList args = parser.positionalArguments();
 
     QStringList paths;
@@ -75,7 +93,8 @@ int main(int argc, char *argv[])
         paths << QDir::currentPath();
     }
 
-    if (AppInstance::attachToExistingInstance(QUrl::fromStringList(paths), false))
+    if ((!command.isEmpty() && AppInstance::attachCommandToExistingInstance(workingDirectory, command, commandArguments))
+        || (command.isEmpty() && AppInstance::attachToExistingInstance(QUrl::fromStringList(paths), false)))
     {
         // Successfully attached to existing instance of Nota
         return 0;
@@ -90,17 +109,15 @@ int main(int argc, char *argv[])
                 &engine,
                 &QQmlApplicationEngine::objectCreated,
                 &app,
-                [url, paths, &server](QObject *obj, const QUrl &objUrl) {
+                [url, paths, command, commandArguments, workingDirectory, &server](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
 
         server->setQmlObject(obj);
-        if (!paths.isEmpty())
+        if (!command.isEmpty())
+            server->openCommandTab(workingDirectory, command, commandArguments);
+        else if (!paths.isEmpty())
             server->openTabs(paths, false);
-        else
-        {
-            server->openTabs({"$PWD"}, false);
-        }
 
     },
     Qt::QueuedConnection);

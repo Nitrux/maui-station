@@ -8,6 +8,10 @@ namespace AppInstance
 QVector<QPair<QSharedPointer<OrgKdeStationActionsInterface>, QStringList>> appInstances(const QString& preferredService);
 
 bool attachToExistingInstance(const QList<QUrl>& inputUrls, bool splitView, const QString& preferredService = QString());
+bool attachCommandToExistingInstance(const QString &workingDirectory,
+                                     const QString &program,
+                                     const QStringList &arguments,
+                                     const QString& preferredService = QString());
 
 bool registerService();
 }
@@ -35,6 +39,9 @@ public Q_SLOTS:
              */
     void openTabs(const QStringList &urls, bool splitView = false);
     void openNewTab(const QString& url);
+    void openCommandTab(const QString &workingDirectory,
+                        const QString &program,
+                        const QStringList &arguments);
 
 
     /**

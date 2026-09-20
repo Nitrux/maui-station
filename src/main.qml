@@ -779,6 +779,23 @@ Maui.ApplicationWindow
         _layout.currentIndex = _layout.count -1
     }
 
+    function shellQuote(value)
+    {
+        return "'" + String(value).replace(/'/g, "'\\''") + "'"
+    }
+
+    function openCommandTab(path, program, arguments)
+    {
+        openTab(path)
+
+        const command = [program].concat(arguments || []).map(shellQuote).join(" ")
+        Qt.callLater(function()
+        {
+            if(root.currentTerminal)
+                root.currentTerminal.session.sendText(command + "\r")
+        })
+    }
+
     function focusNextSplit()
     {
         if(!root.currentTab || root.currentTab.count <= 1)
