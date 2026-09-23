@@ -39,7 +39,7 @@ public Q_SLOTS:
              */
     void openTabs(const QStringList &urls, bool splitView = false);
     void openNewTab(const QString& url);
-    void openCommandTab(const QString &workingDirectory,
+    bool openCommandTab(const QString &workingDirectory,
                         const QString &program,
                         const QStringList &arguments);
 
@@ -53,4 +53,3 @@ private:
     QObject* m_qmlObject = nullptr;
 
 };
-

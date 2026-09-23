@@ -775,8 +775,9 @@ Maui.ApplicationWindow
 
     function openTab(path : string)
     {
-        _layout.addTab(_terminalComponent, {'path': path});
+        const tab = _layout.addTab(_terminalComponent, {'path': path});
         _layout.currentIndex = _layout.count -1
+        return tab
     }
 
     function shellQuote(value)
@@ -786,14 +787,21 @@ Maui.ApplicationWindow
 
     function openCommandTab(path, program, arguments)
     {
-        openTab(path)
+        const tab = openTab(path)
 
         const command = [program].concat(arguments || []).map(shellQuote).join(" ")
-        Qt.callLater(function()
+        function sendCommand()
         {
-            if(root.currentTerminal)
-                root.currentTerminal.session.sendText(command + "\r")
-        })
+            if(tab && tab.currentItem && tab.currentItem.session)
+            {
+                tab.currentItem.session.sendText(command + "\r")
+                return
+            }
+
+            Qt.callLater(sendCommand)
+        }
+
+        Qt.callLater(sendCommand)
     }
 
     function focusNextSplit()

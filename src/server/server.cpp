@@ -109,9 +109,16 @@ bool AppInstance::attachCommandToExistingInstance(const QString &workingDirector
     for (const auto &interface : std::as_const(interfaces)) {
         auto reply = interface.first->openCommandTab(workingDirectory, program, arguments);
         reply.waitForFinished();
-        if (!reply.isError()) {
+        if (!reply.isError() && reply.value()) {
             interface.first->activateWindow();
             return true;
+        }
+
+        if (reply.isError()) {
+            qWarning() << "Could not forward command tab request to Station instance:"
+                       << reply.error().name() << reply.error().message();
+        } else {
+            qWarning() << "Station instance rejected the command tab request.";
         }
     }
 
@@ -196,17 +203,25 @@ void Server::openNewTab(const QString &url)
     }
 }
 
-void Server::openCommandTab(const QString &workingDirectory,
+bool Server::openCommandTab(const QString &workingDirectory,
                             const QString &program,
                             const QStringList &arguments)
 {
-    if (m_qmlObject)
-    {
-        QMetaObject::invokeMethod(m_qmlObject, "openCommandTab",
-                                  Q_ARG(QString, workingDirectory),
-                                  Q_ARG(QString, program),
-                                  Q_ARG(QVariant, QVariant::fromValue(arguments)));
+    if (!m_qmlObject) {
+        qWarning() << "Could not open command tab: Station's QML object is not ready.";
+        return false;
     }
+
+    const bool invoked = QMetaObject::invokeMethod(m_qmlObject,
+                                                   "openCommandTab",
+                                                   Qt::QueuedConnection,
+                                                   Q_ARG(QString, workingDirectory),
+                                                   Q_ARG(QString, program),
+                                                   Q_ARG(QVariant, QVariant::fromValue(arguments)));
+    if (!invoked)
+        qWarning() << "Could not invoke Station's openCommandTab function.";
+
+    return invoked;
 }
 
 void Server::openNewWindow(const QString &url)
