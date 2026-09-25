@@ -215,8 +215,8 @@ bool Server::openCommandTab(const QString &workingDirectory,
     const bool invoked = QMetaObject::invokeMethod(m_qmlObject,
                                                    "openCommandTab",
                                                    Qt::QueuedConnection,
-                                                   Q_ARG(QString, workingDirectory),
-                                                   Q_ARG(QString, program),
+                                                   Q_ARG(QVariant, QVariant::fromValue(workingDirectory)),
+                                                   Q_ARG(QVariant, QVariant::fromValue(program)),
                                                    Q_ARG(QVariant, QVariant::fromValue(arguments)));
     if (!invoked)
         qWarning() << "Could not invoke Station's openCommandTab function.";

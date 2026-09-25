@@ -318,7 +318,7 @@ Maui.ApplicationWindow
 
                 anchors.fill: parent
 
-                onNewTabClicked: root.openTab("$PWD")
+                onNewTabClicked: { root.openTab("$PWD") }
                 onCloseTabClicked:(index) => root.closeTab(index)
                 tabViewButton: Maui.TabViewButton
                 {
@@ -337,13 +337,15 @@ Maui.ApplicationWindow
                     readonly property var tabInfo:
                     {
                         const _pulse = _tabButton._modelPulse
-                        const item = _tabButton.tabView && _tabButton.tabView.contentModel ? _tabButton.tabView.contentModel.get(_tabButton.mindex) : null
+                        const model = _tabButton.tabView ? _tabButton.tabView.contentModel : null
+                        const item = model && _tabButton.mindex >= 0 && _tabButton.mindex < model.count
+                            ? model.get(_tabButton.mindex) : null
                         return item && item.Maui && item.Maui.Controls ? item.Maui.Controls : ({})
                     }
                     text: tabInfo.title ? tabInfo.title : ""
                     icon.name: tabInfo.iconName ? tabInfo.iconName : ""
                     Maui.Controls.badgeText: tabInfo.badgeText ? tabInfo.badgeText : ""
-                    Maui.Controls.status: tabInfo.status
+                    Maui.Controls.status: typeof tabInfo.status !== "undefined" ? tabInfo.status : Maui.Controls.Normal
                     ToolTip.text: tabInfo.toolTipText ? tabInfo.toolTipText : ""
                     Drag.active: false
                     Drag.dragType: Drag.None
@@ -360,7 +362,7 @@ Maui.ApplicationWindow
                     // Hide the built-in color strip so we can locally tune its thickness.
                     color: "transparent"
 
-                    readonly property bool _isSuperUserTab : tabInfo.color
+                    readonly property bool _isSuperUserTab : !!tabInfo.color
                                                             && tabInfo.color.toString() === Maui.Theme.negativeBackgroundColor.toString()
 
                     Rectangle
@@ -773,7 +775,7 @@ Maui.ApplicationWindow
         }
     }
 
-    function openTab(path : string)
+    function openTab(path : string) : Item
     {
         const tab = _layout.addTab(_terminalComponent, {'path': path});
         _layout.currentIndex = _layout.count -1
