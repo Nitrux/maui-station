@@ -1,5 +1,11 @@
 #pragma once
 #include <QObject>
+#include <QList>
+#include <QPair>
+#include <QSharedPointer>
+#include <QStringList>
+#include <QUrl>
+#include <QVector>
 
 class OrgKdeStationActionsInterface;
 

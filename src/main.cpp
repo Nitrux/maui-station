@@ -10,6 +10,7 @@
 #include <MauiKit4/Core/mauiapp.h>
 #include <MauiKit4/Terminal/moduleinfo.h>
 
+#include <KLocalizedQmlContext>
 #include <KLocalizedString>
 #include <KAboutData>
 
@@ -19,7 +20,7 @@
 
 #include "server/server.h"
 
-#include "../station_version.h"
+#include "station_version.h"
 
 #define STATION_URI "org.maui.station"
 
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
     },
     Qt::QueuedConnection);
 
-    engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
+    engine.rootContext()->setContextObject(new KLocalizedQmlContext(&engine));
 
     qmlRegisterAnonymousType<Key> (STATION_URI, 1);
     qmlRegisterType<KeysHelper> (STATION_URI, 1, 0, "KeysModel");

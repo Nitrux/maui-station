@@ -2,6 +2,7 @@
 
 #include <QAbstractListModel>
 #include <QObject>
+#include <QVariantList>
 
 struct Key {
     Q_GADGET

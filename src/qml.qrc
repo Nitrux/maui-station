@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/app/maui/station">
+        <file>main.qml</file>
+        <file>widgets/TutorialDialog.qml</file>
+        <file>widgets/CommandShortcuts.qml</file>
+        <file>widgets/SettingsDialog.qml</file>
+        <file>widgets/Terminal.qml</file>
+        <file>widgets/TerminalLayout.qml</file>
+    </qresource>
+</RCC>
