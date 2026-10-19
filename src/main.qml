@@ -120,18 +120,12 @@ Maui.ApplicationWindow
             display: ToolButton.TextOnly
             font.bold: true
             font.pointSize: Maui.Style.fontSizes.small
-            onClicked: _layout.openOverview()
 
             background: Rectangle
             {
                 color: Maui.Theme.alternateBackgroundColor
                 radius: Maui.Style.radiusV
             }
-
-            ToolTip.delay: 1000
-            ToolTip.timeout: 5000
-            ToolTip.visible: hovered
-            ToolTip.text: i18n("Tab Overview")
         }
     }
 
