@@ -711,7 +711,7 @@ Maui.ApplicationWindow
             property var cb : ({})
             property int index: -1
 
-            // title: i18n("Close")
+            title: i18n("Close")
             message: i18n("A process is still running. Are you sure you want to interrupt it and close it?")
 
             template.iconSource: "dialog-warning"
