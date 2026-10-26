@@ -209,6 +209,9 @@ Maui.ApplicationWindow
                 }
 
                 headerMargins: Maui.Style.defaultPadding
+                headBar.preferredHeight: Maui.Style.rowHeightAlt
+                headBar.topPadding: Maui.Style.defaultPadding
+                headBar.bottomPadding: Maui.Style.defaultPadding
                 headBar.middleContent: Maui.ToolActions
                 {
                     autoExclusive: true
@@ -557,6 +560,9 @@ Maui.ApplicationWindow
             }
 
             footBar.visible: Maui.Handy.isMobile || Maui.Handy.isTouch
+            footBar.preferredHeight: Maui.Style.rowHeightAlt
+            footBar.topPadding: Maui.Style.defaultPadding
+            footBar.bottomPadding: Maui.Style.defaultPadding
             footerContainer.margins: Maui.Style.contentMargins
             footerContainer.topMargin: 0
 
