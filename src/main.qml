@@ -724,9 +724,10 @@ Maui.ApplicationWindow
             template.iconVisible: true
             template.iconSizeHint: Maui.Style.iconSizes.huge
 
-            standardButtons: Dialog.Ok | Dialog.Cancel
+            standardButtons: Dialog.Discard | Dialog.Cancel
+            Component.onCompleted: standardButton(Dialog.Discard).text = i18n("Close")
 
-            onAccepted:
+            onDiscarded:
             {
                 _confirmCloseDialog.close()
 
