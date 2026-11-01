@@ -24,6 +24,7 @@ Maui.ApplicationWindow
     readonly property Term.Terminal currentTerminal : currentTab && currentTab.currentItem ? currentTab.currentItem.terminal : null
     readonly property font defaultFont : Maui.Style.monospacedFont
     readonly property alias currentTabIndex : _layout.currentIndex
+    readonly property bool compactToolbarLayout: !root.isWide
 
     Maui.WindowBlur
     {
@@ -125,6 +126,87 @@ Maui.ApplicationWindow
             {
                 color: Maui.Theme.alternateBackgroundColor
                 radius: Maui.Style.radiusV
+            }
+        }
+    }
+
+    Component
+    {
+        id: _tabOverviewButtonComponent
+
+        ToolButton
+        {
+            display: ToolButton.IconOnly
+            onClicked: _layout.openOverview()
+            Layout.alignment: Qt.AlignVCenter
+            height: Maui.Style.rowHeight
+            leftPadding: Maui.Style.space.small
+            rightPadding: Maui.Style.space.small
+            topPadding: 0
+            bottomPadding: 0
+
+            contentItem: RowLayout
+            {
+                spacing: Maui.Style.space.small
+
+                Maui.Icon
+                {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: Maui.Style.iconSizes.small
+                    Layout.preferredHeight: Maui.Style.iconSizes.small
+                    source: "view-grid"
+                    color: Maui.Theme.textColor
+                }
+
+                ToolButton
+                {
+                    Layout.alignment: Qt.AlignVCenter
+                    text: _layout.count
+                    display: ToolButton.TextOnly
+                    font.bold: true
+                    font.pointSize: Maui.Style.fontSizes.small
+                    ToolTip.visible: false
+                    onClicked: {}
+
+                    background: Rectangle
+                    {
+                        color: Maui.Theme.alternateBackgroundColor
+                        radius: Maui.Style.radiusV
+                    }
+                }
+            }
+
+            Maui.Controls.toolTipText: i18n("Show tabs")
+        }
+    }
+
+    Component
+    {
+        id: _overflowMenuButtonComponent
+
+        Maui.ToolButtonMenu
+        {
+            icon.name: "overflow-menu"
+
+            MenuItem
+            {
+                text: i18n("Shortcuts")
+                icon.name: "configure-shortcuts"
+                onTriggered: root.openShortcutsDialog()
+            }
+
+            MenuItem
+            {
+                icon.name: "settings-configure"
+                text: i18n("Settings")
+                onTriggered: root.openSettingsDialog()
+            }
+
+            MenuItem
+            {
+                text: i18n("About")
+                icon.name: "documentinfo"
+                onTriggered: Maui.App.aboutDialog()
             }
         }
     }
@@ -309,11 +391,12 @@ Maui.ApplicationWindow
                 id: _layout
                 clip: true
                 background: null
-                altTabBar: Maui.Handy.isMobile
+                altTabBar: false
                 Maui.Controls.showCSD: true
                 showDefaultMenuEntries: false
 
                 anchors.fill: parent
+                anchors.bottomMargin: _bottomToolBar.visible ? _bottomToolBar.height + _bottomToolBar.anchors.bottomMargin + _bottomToolBar.topPadding : 0
 
                 onNewTabClicked: { root.openTab("$PWD") }
                 onCloseTabClicked:(index) => root.closeTab(index)
@@ -434,7 +517,7 @@ Maui.ApplicationWindow
 
                 tabBarMargins: Maui.Style.defaultPadding
                 tabBar.showNewTabButton: false
-                tabBar.visible: true
+                tabBar.visible: !compactToolbarLayout
                 tabBar.background: Rectangle
                 {
                     color: Maui.Theme.backgroundColor
@@ -548,6 +631,97 @@ Maui.ApplicationWindow
                     }
                 ]
 
+            }
+
+            Maui.ToolBar
+            {
+                id: _bottomToolBar
+                z: 2
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.leftMargin: Maui.Style.contentMargins
+                anchors.rightMargin: Maui.Style.contentMargins
+                anchors.bottomMargin: Maui.Style.contentMargins
+                visible: compactToolbarLayout
+                position: ToolBar.Footer
+                preferredHeight: Maui.Style.rowHeight
+                topPadding: Maui.Style.space.small
+                bottomPadding: Maui.Style.space.small
+                forceCenterMiddleContent: false
+                background: Rectangle
+                {
+                    color: Maui.Theme.backgroundColor
+                    radius: Maui.Style.radiusV
+                    border.color: Maui.Theme.alternateBackgroundColor
+                }
+
+                leftContent: [
+                    ToolButton
+                    {
+                        icon.name: "tab-new"
+                        display: ToolButton.IconOnly
+                        Maui.Controls.toolTipText: i18n("New Tab")
+                        onClicked: root.openTab("$PWD")
+                    },
+
+                    ToolButton
+                    {
+                        enabled: !!root.currentTab
+                        checkable: true
+                        checked: enabled && root.currentTab.count === 2
+                        icon.name: root.currentTab && root.currentTab.orientation === Qt.Horizontal ? "view-split-left-right" : "view-split-top-bottom"
+                        display: ToolButton.IconOnly
+                        Maui.Controls.toolTipText: i18n("Split")
+                        onClicked:
+                        {
+                            if(root.currentTab)
+                                root.currentTab.split()
+                        }
+                    }
+                ]
+
+                rightContent: [
+                    ToolButton
+                    {
+                        icon.name: "edit-find"
+                        display: ToolButton.IconOnly
+                        Maui.Controls.toolTipText: i18n("Search")
+                        checked: root.currentTerminal ? root.currentTerminal.footBar.visible : false
+                        onClicked:
+                        {
+                            if(root.currentTerminal)
+                                root.currentTerminal.toggleSearchBar()
+                        }
+                    },
+
+                    Loader
+                    {
+                        asynchronous: true
+                        active: _layout.count > 1
+                        visible: active
+                        Layout.minimumHeight: Maui.Style.rowHeight
+                        Layout.maximumHeight: Maui.Style.rowHeight
+                        Layout.preferredHeight: Maui.Style.rowHeight
+                        Layout.alignment: Qt.AlignVCenter
+                        sourceComponent: _tabOverviewButtonComponent
+                    },
+
+                    ToolSeparator
+                    {
+                        height: Maui.Style.space.medium
+                        visible: _layout.count > 1
+                        topPadding: 0
+                        bottomPadding: 0
+                    },
+
+                    Loader
+                    {
+                        asynchronous: true
+                        Layout.alignment: Qt.AlignVCenter
+                        sourceComponent: _overflowMenuButtonComponent
+                    }
+                ]
             }
 
             Maui.Holder
