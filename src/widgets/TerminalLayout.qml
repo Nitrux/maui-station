@@ -18,12 +18,35 @@ Maui.SplitView
 
     readonly property string title : count === 2 ?  contentModel.get(0).title  + " - " + contentModel.get(1).title : (currentItem ? currentItem.title : "")
     readonly property color tabColor : hasRootProcess ? Maui.Theme.negativeBackgroundColor : "transparent"
+    property url previewSource: ""
+    property var previewResult: null
 
     Maui.Controls.title: title
     Maui.Controls.toolTipText: currentItem ? currentItem.session.currentDir : ""
     Maui.Controls.color: tabColor
     Maui.Controls.iconName: control.hasActiveProcess ? "run-build" : ""
     Maui.Controls.badgeText: count === 2 ? "[|]" : ""
+
+    function capturePreview()
+    {
+        if (!control.visible || control.width <= 0 || control.height <= 0)
+            return
+
+        control.grabToImage(function(result)
+        {
+            if (result && result.url)
+            {
+                control.previewResult = result
+                control.previewSource = result.url
+            }
+        })
+    }
+
+    onVisibleChanged:
+    {
+        if (visible)
+            Qt.callLater(control.capturePreview)
+    }
 
     Action
     {
