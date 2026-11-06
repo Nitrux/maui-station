@@ -1,6 +1,6 @@
 # Station
 
-![](https://mauikit.org/wp-content/uploads/2018/12/maui_project_logo.png)
+![maui_logo_current](https://nxos.org/wp-content/uploads/2019/10/maui_project_logo-min.png)
 
 _Terminal emulator application built with MauiKit._
 
